@@ -52,7 +52,7 @@ const TopBar = () => {
 
 
   return (
-    <div className="w-full h-16 bg-[#563635] flex items-center justify-between px-4 text-white">
+    <div className="w-full h-16 bg-[#563635] flex items-center justify-between px-4 text-white drop-shadow-md">
       <h1 className="text-xl font-bold">AI Travel Assistant</h1>
       <div className="flex items-center space-x-4">
         <Icon icon="iconamoon:profile-circle-fill" onClick={toggleLoginPopup} className="w-12 h-12 hover:text-[#4e2c20] transition duration-200 cursor-pointer"/>
@@ -60,7 +60,7 @@ const TopBar = () => {
 
       {/* Conditional Rendering for the Login Popup */}
       {showLogin && (
-        <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-50">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 w-screen h-screen">
           <div className="bg-white p-8 rounded shadow-lg w-96">
             {/* Login Title */}
             <h2 className="text-2xl mb-6 font-bold text-gray-800">Login</h2>
@@ -118,7 +118,7 @@ const TopBar = () => {
       {/* Conditional Rendering for the New User Popup */}
       {/* Conditional Rendering for the New User Popup */}
       {showNewUser && (
-        <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-50">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 w-screen h-screen">
           <div className="bg-white p-8 rounded shadow-lg w-96">
             <h2 className="text-2xl mb-6 font-bold text-gray-800">New User Registration</h2>
             <form onSubmit={handleSubmitNewUser}>

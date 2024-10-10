@@ -1,11 +1,18 @@
-from LLaMaTravelAI import  *
-from Parsing import TextParsingProblem, greeting_grammer, greeting_check, generateGreeting
+from flask import Flask, request, jsonify
 from postgresConnection import *
 import getpass
-#from PhiLocalAI import *
+from FlightPlanner import *
+from ItineraryPlanner import *
+from LodgingPlanner import *
+from LLaMaTravelAI import *
+from PhiLocalAI import *
+from flask_cors import CORS
+from Parsing import  *
+
+app = Flask(__name__)
+CORS(app)
 
 def run_trip_planner(loggedUser, description, greeting):
-    current_output = ""
     if greeting:
         current_output = ""
         prompt = description
@@ -20,101 +27,208 @@ def run_trip_planner(loggedUser, description, greeting):
         try:
             # Try to generate key points from API
             current_output = ""
-            for output in generate_key_points(description):
+            for output in generate_key_itinerary_points(description):
                 current_output += output
 
-            print("Generated key points using API")
-        except Exception as e:
-            # If the API fails, fallback to the local model
-            print(f"API failed with error: {e}, falling back to local model.")
+            plan = parse_plan_output(current_output, description)
+        except Exception:
+            # Cannot generate output locally that breaks it up into days, too resource intensive and not possible
+            plan = get_trip_planning_suggestions_local(description)
 
-            # Using the local model (replace this with your actual LLaMaTravelAI logic)
-            # current_output = get_trip_planning_suggestions(description)
+        if loggedUser != "None":
+            postHistory(user_login=loggedUser, title_message=description, ai_response=plan)
 
-            # Cannot generate output locally that breaks it up into days, to resource intensive and not possible
-            return
+        return plan
 
-        # Parse the output
-        dataframe, rationale = parse_llm_output(current_output)
-        print(rationale)
+def run_flight_planner(loggedUser, description, greeting):
+    current_output = ""
+    if greeting:
+        for output in generateGreeting(description):
+            current_output += output
+        print(current_output)
+        if loggedUser != "None":
+            postHistory(user_login=loggedUser, title_message=description, ai_response=current_output)
 
-        # Geocode the addresses
-        coordinates = geocode_addresses(dataframe["name"])
-        dataframe["lat"] = [cords["lat"] if cords else None for cords in coordinates]
-        dataframe["lon"] = [cords["lon"] if cords else None for cords in coordinates]
+    else:
+        print(f"Generating flight plan for: {description}\n")
 
-        num_days = extract_num_days_from_prompt(description)
-        if len(dataframe) < num_days:
-            print(
-                f"Warning: Not enough locations to fill {num_days} days. You may need to adjust your trip description.")
+        try:
+            # Generate key points using API
+            for output in generate_key_airplane_points(description):
+                current_output += output
 
-        # Split the trip into days
-        days = split_trip_into_days(dataframe, num_days)
+            plan = parse_flight_output(current_output, description)
+        except Exception:
+            # Cannot generate output locally that breaks it up into days, too resource intensive and not possible
+            plan = get_flight_planning_suggestions_local(description)
 
-        plan = ""
-        # Display the trip plan, split by days
-        for day, activities in days.items():
-            print(f"\n{day}:\n")
-            plan += f"\n{day}:\n"
-            for _, row in activities.iterrows():
-                print(
-                    f"Location: {row['name']}\nDescription: {row['description']}\nCoordinates: ({row['lat']}, {row['lon']})\n")
-                plan += f"Location: {row['name']}\nDescription: {row['description']}\nCoordinates: ({row['lat']}, {row['lon']})\n"
-        postHistory(user_login=loggedUser, title_message=description, ai_response=plan)
+        if loggedUser != "None":
+            postHistory(user_login=loggedUser, title_message=description, ai_response=plan)
 
+        return plan
+
+def run_lodging_planner(loggedUser, description, greeting):
+    current_output = ""
+    if greeting:
+        for output in generateGreeting(description):
+            current_output += output
+        print(current_output)
+        if loggedUser != "None":
+            postHistory(user_login=loggedUser, title_message=description, ai_response=current_output)
+
+    else:
+        print(f"Generating hotel plan for: {description}\n")
+
+        try:
+            # Generate key hotel points using the LLM
+            for output in generate_key_lodging_points(description):
+                current_output += output
+
+            # Parse the LLM output for hotel details
+            plan = parse_lodging_output(current_output, description)
+        except Exception:
+            # In case of API failure, fall back to local suggestion generation
+            plan = get_lodging_planning_suggestions_local(description)
+
+        if loggedUser != "None":
+            postHistory(user_login=loggedUser, title_message=description, ai_response=plan)
+
+        return plan
+
+def run_generic_planner(loggedUser, description, greeting):
+    current_output = ""
+    if greeting:
+        for output in generateGreeting(description):
+            current_output += output
+        print(current_output)
+        if loggedUser != "None":
+            postHistory(user_login=loggedUser, title_message=description, ai_response=current_output)
+
+    else:
+        print(f"Generating feedback: {description}\n")
+
+        try:
+            # Generate key hotel points using the LLM
+            for output in generate_generic_travel_prompt(description):
+                current_output += output
+
+            print (current_output)
+            # Parse the LLM output for hotel details
+            plan = current_output
+        except Exception:
+            # In case of API failure, fall back to local suggestion generation
+            plan = get_generic_planning_suggestions_local(description)
+
+        if loggedUser != "None":
+            postHistory(user_login=loggedUser, title_message=description, ai_response=plan)
+
+        return plan
+
+
+@app.route('/run_trip_planner', methods=['POST'])
+def trip_planner():
+    data = request.json
+    logged_user = data.get('loggedUser')
+    description = data.get('description')
+
+    if not logged_user or not description:
+        return jsonify({'error': 'Missing loggedUser or description'}), 400
+
+    try:
+        plan = run_trip_planner(loggedUser=logged_user, description=description)
+        return jsonify({'plan': plan}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 # Example command-line interface loop
 def main():
     print("Welcome to the AI Trip Planner!")
-    choice = input("Would you like to login (1) or create a new user (2)?\n")
+    choice = input("Would you like to run the command line interface (1) or the Flask server (2)?\n")
+    ##normal code
     if choice == "1":
-        username = input("Username: ")
-        password = getpass.getpass("Password: ")
-        loggedUser = checkLogin(username=username, password=password)
-        if loggedUser is None:
-            exit()
-        else:
-            print(f"Welcome, {loggedUser}")
-
-        disp_history = input("Would you like to view your previous chat history?\nYes(y) or No(n)?\n")
-        if disp_history == "y":
-            history = fetchHistory(loggedUser)
-            if history:
-                for entry in history:
-                    print(f"{entry['title']}")
-                    print(f"{entry['response']}")
-                    print(f"{entry['timestamp']}\n")
+        choice = input("Would you like to login (1), create a new user (2), or not log in (3)?\n")
+        if choice == "1":
+            username = input("Username: ")
+            password = getpass.getpass("Password: ")
+            loggedUser = checkLogin(username=username, password=password)
+            if loggedUser is None:
+                exit()
             else:
-                print("No current chat history.")
-        else:
-            pass
-    elif choice == "2":
-        username = input("Please Enter Username: ")
-        password = getpass.getpass("Please Choose a Password: ")
-        redo_pass = getpass.getpass("Please Confirm Password: ")
-        while redo_pass != password:
-            password = getpass.getpass("Passwords Do Not Match, Please Try Again: ")  
-            redo_pass = getpass.getpass("Please Confirm Password: ")
-        loggedUser = createUser(username=username, password=password)
-        if loggedUser is None:
-            exit()
-        else: 
-            print(f"Welcome, {loggedUser}")
-    else:
-        print("Invalid choice. Please try again.")
-        exit()
-    while True:
-        print("\nEnter a trip description (or type 'exit' to quit):")
-        description = input("> ").strip()
-        initial_state = description.lower().split()
-        print(initial_state)
-        greeting_problem = TextParsingProblem(initial=initial_state, grammar=greeting_grammer, goal='S')
-        print(description)
-        if description.lower() == "exit":
-            print("\n Hope you have a good trip!")
-            break
-        run_trip_planner(loggedUser=loggedUser, description=description, greeting=greeting_check(greeting_problem))
+                print(f"Welcome, {loggedUser}")
 
+            disp_history = input("Would you like to view your previous chat history?\nYes(y) or No(n)?\n")
+            if disp_history == "y":
+                history = fetchHistory(loggedUser)
+                if history:
+                    for entry in history:
+                        print(f"{entry['title']}")
+                        print(f"{entry['response']}")
+                        print(f"{entry['timestamp']}\n")
+                else:
+                    print("No current chat history.")
+            else:
+                pass
+
+        elif choice == "2":
+            username = input("Please Enter Username: ")
+            password = getpass.getpass("Please Choose a Password: ")
+            redo_pass = getpass.getpass("Please Confirm Password: ")
+            while redo_pass != password:
+                password = getpass.getpass("Passwords Do Not Match, Please Try Again: ")
+                redo_pass = getpass.getpass("Please Confirm Password: ")
+            loggedUser = createUser(username=username, password=password)
+            if loggedUser is None:
+                exit()
+            else:
+                print(f"Welcome, {loggedUser}")
+
+        elif choice == "3":
+            print("Welcome")
+
+        else:
+            print("Invalid choice. Please try again.")
+            exit()
+
+        while True:
+            plan_type = input("Would you like to create an itinerary (1), find flights (2), find lodging (3), or generic inquiry (4)?\n")
+            if plan_type == "1":
+                print("\nEnter a trip description:")
+                description = input("> ").strip()
+
+                initial_state = description.lower().split()
+                greeting_problem = TextParsingProblem(initial=initial_state, grammar=greeting_grammer, goal='S')
+                run_trip_planner(loggedUser="None", description=description, greeting=greeting_check(greeting_problem))
+            elif plan_type == "2":
+                print("\nEnter in which cities you want to fly between:")
+                description = input("> ").strip()
+
+                initial_state = description.lower().split()
+                greeting_problem = TextParsingProblem(initial=initial_state, grammar=greeting_grammer, goal='S')
+                run_flight_planner(loggedUser="None", description=description,greeting=greeting_check(greeting_problem))
+            elif plan_type == "3":
+                print("\nEnter what city you want to find lodging:")
+                description = input("> ").strip()
+
+                initial_state = description.lower().split()
+                greeting_problem = TextParsingProblem(initial=initial_state, grammar=greeting_grammer, goal='S')
+                run_lodging_planner(loggedUser="None", description=description,greeting=greeting_check(greeting_problem))
+            elif plan_type == "4":
+                print("\nEnter any travel related questions:")
+                description = input("> ").strip()
+
+                initial_state = description.lower().split()
+                greeting_problem = TextParsingProblem(initial=initial_state, grammar=greeting_grammer, goal='S')
+                run_generic_planner(loggedUser="None", description=description,greeting=greeting_check(greeting_problem))
+
+            print("Do you want to exit (Y/N): ")
+            description = input("> ").strip()
+            if description.lower() == "y":
+                print("\n Hope you have a good trip!")
+                break
+
+    # flask interface
+    elif choice == "2":
+        app.run(debug=True)
 
 if __name__ == "__main__":
     main()
