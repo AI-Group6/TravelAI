@@ -2,7 +2,7 @@ from LLaMaTravelAI import  *
 from Parsing import TextParsingProblem, greeting_grammer, greeting_check, generateGreeting
 from postgresConnection import *
 import getpass
-from PhiLocalAI import *
+#from PhiLocalAI import *
 
 def run_trip_planner(loggedUser, description, greeting):
     current_output = ""

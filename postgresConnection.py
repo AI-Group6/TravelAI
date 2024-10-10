@@ -1,5 +1,10 @@
 import psycopg2
 from psycopg2 import sql
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+
+app = Flask(__name__)
+CORS(app)
 
 #params
 conn_params = {
@@ -11,6 +16,7 @@ conn_params = {
 }
 
 # a function to get the chat history from the database
+@app.route('/history', methods=['Get'])
 def fetchHistory(username):
     try:
         #connect to db
@@ -55,6 +61,7 @@ def fetchHistory(username):
         print(f"Error fetching chat history: {e}")
 
 # a function to post AI response to the database
+@app.route('/history', methods=['Post'])
 def postHistory(user_login, title_message, ai_response):
     try:
         #connect to db
@@ -83,6 +90,7 @@ def postHistory(user_login, title_message, ai_response):
         return None
 
 #function to check if the given username and password are correct.
+@app.route('/users', methods=['Get'])
 def checkLogin(username, password):
     try:
         #connect to db
@@ -111,7 +119,10 @@ def checkLogin(username, password):
         print(f"Username or Password Incorrect")
 
 #create login by posting user information
-def createUser(username, password):
+@app.route('/users', methods=['Post'])
+def createUser():
+    newUser = request.json
+    print("Here")
     try:
         #connect to db
         conn = psycopg2.connect(**conn_params)
@@ -119,7 +130,7 @@ def createUser(username, password):
         #define sql query
         query = "SELECT * FROM loginInfo WHERE login = %s"
         #execute query
-        cursor.execute(query, (username,))
+        cursor.execute(query, (newUser['login'],))
         #fetch result
         result = cursor.fetchone()
         #close cursor and connection
@@ -143,7 +154,7 @@ def createUser(username, password):
             VALUES (%s, %s)
         """
         #execute query
-        cursor.execute(query, (username, password))
+        cursor.execute(query, (newUser['login'], newUser['password']))
 
         #commit transaction 
         conn.commit()
@@ -153,9 +164,11 @@ def createUser(username, password):
         conn.close()
 
         print("New User Successfully Created")
-        return username
+        return newUser['login']
 
     except Exception as e:
         print(f"Error creating new user, please try again: {e}")
         return None
 
+if __name__ == '__main__':
+    app.run(debug=True)

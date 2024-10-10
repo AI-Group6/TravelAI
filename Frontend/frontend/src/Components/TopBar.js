@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Icon } from '@iconify/react';
-
+import {postUser} from "../Routes";
 
 const TopBar = () => {
 
@@ -37,7 +37,8 @@ const TopBar = () => {
     }
 
     // Proceed with registration logic
-    console.log('Registration successful!', { username, password });
+    console.log('Registration successful!', username, password);
+    postUser(username, password);
     // Here you can call your API to register the user
   };
 
