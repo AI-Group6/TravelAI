@@ -91,8 +91,10 @@ def postHistory(user_login, title_message, ai_response):
 
 #function to check if the given username and password are correct.
 @app.route('/users', methods=['Get'])
-def checkLogin(username, password):
+def checkLogin():
     try:
+        username = request.args.get('login')
+        password = request.args.get('password')
         #connect to db
         conn = psycopg2.connect(**conn_params)
         cursor = conn.cursor()
@@ -111,37 +113,45 @@ def checkLogin(username, password):
         conn.close()
 
         if result:
-            return username
+            return jsonify({'exists': True})
         else: 
             raise Exception
 
     except Exception:
-        print(f"Username or Password Incorrect")
+        print("Username or Password Incorrect")
+        return jsonify({'exists': False})
 
 #create login by posting user information
 @app.route('/users', methods=['Post'])
 def createUser():
     newUser = request.json
-    print("Here")
+    print(newUser)
+    print(newUser['login'])
+    """
     try:
         #connect to db
         conn = psycopg2.connect(**conn_params)
         cursor = conn.cursor()
-        #define sql query
-        query = "SELECT * FROM loginInfo WHERE login = %s"
-        #execute query
+
+        # SQL query to check if the user exists
+        query = "SELECT * FROM users WHERE username = %s;"
+
         cursor.execute(query, (newUser['login'],))
-        #fetch result
-        result = cursor.fetchone()
-        #close cursor and connection
+
+        # Fetch one result
+        user = cursor.fetchone()
+
+        # Close the cursor and connection
         cursor.close()
         conn.close()
 
-        if result:
+        # Return True if user exists, False otherwise
+        if user is not None:
             raise Exception
     except Exception:
         print(f"User Already Exists")
-        return None
+        return newUser['login']
+        """
 
     try:
         #connect to db
@@ -168,7 +178,6 @@ def createUser():
 
     except Exception as e:
         print(f"Error creating new user, please try again: {e}")
-        return None
-
+        return newUser['login']
 if __name__ == '__main__':
     app.run(debug=True)

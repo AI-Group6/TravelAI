@@ -3,17 +3,9 @@
   <database-model serializer="dbm" dbms="POSTGRES" family-id="POSTGRES" format-version="4.53">
     <root id="1">
       <DateStyle>mdy</DateStyle>
-      <Grants>1||-9223372036854775808|c|G
-1||10|c|G
-1||10|C|G
-1||10|T|G
-4||-9223372036854775808|c|G
-4||10|c|G
-4||10|C|G
-4||10|T|G</Grants>
-      <IntrospectionStateNumber>753</IntrospectionStateNumber>
+      <IntrospectionStateNumber>766</IntrospectionStateNumber>
       <ServerVersion>16.1</ServerVersion>
-      <StartupTime>1728521563</StartupTime>
+      <StartupTime>1728528102</StartupTime>
       <TimeZones>true ACDT
 true ACSST
 false ACST
@@ -809,7 +801,7 @@ false Zulu
 14643||10|C|G
 14643||-9223372036854775808|U|G
 14643||10|U|G</Grants>
-      <IntrospectionStateNumber>753</IntrospectionStateNumber>
+      <IntrospectionStateNumber>766</IntrospectionStateNumber>
       <ObjectId>5</ObjectId>
       <OwnerName>postgres</OwnerName>
     </database>
@@ -4246,69 +4238,69 @@ false Zulu
     <schema id="265" parent="2" name="public">
       <Comment>standard public schema</Comment>
       <Current>1</Current>
-      <IntrospectionStateNumber>753</IntrospectionStateNumber>
-      <LastIntrospectionLocalTimestamp>2024-10-10.00:53:01</LastIntrospectionLocalTimestamp>
+      <IntrospectionStateNumber>766</IntrospectionStateNumber>
+      <LastIntrospectionLocalTimestamp>2024-10-10.02:47:16</LastIntrospectionLocalTimestamp>
       <ObjectId>2200</ObjectId>
       <StateNumber>524</StateNumber>
       <OwnerName>pg_database_owner</OwnerName>
     </schema>
     <table id="266" parent="265" name="chathistory">
-      <ObjectId>16404</ObjectId>
-      <StateNumber>748</StateNumber>
+      <ObjectId>16421</ObjectId>
+      <StateNumber>762</StateNumber>
       <AccessMethodId>2</AccessMethodId>
       <OwnerName>postgres</OwnerName>
     </table>
     <table id="267" parent="265" name="logininfo">
-      <ObjectId>16399</ObjectId>
-      <StateNumber>748</StateNumber>
+      <ObjectId>16416</ObjectId>
+      <StateNumber>762</StateNumber>
       <AccessMethodId>2</AccessMethodId>
       <OwnerName>postgres</OwnerName>
     </table>
     <column id="268" parent="266" name="login">
       <NotNull>1</NotNull>
       <Position>1</Position>
-      <StateNumber>748</StateNumber>
+      <StateNumber>762</StateNumber>
       <StoredType>varchar(20)|0s</StoredType>
       <TypeId>1043</TypeId>
     </column>
     <column id="269" parent="266" name="title">
       <NotNull>1</NotNull>
       <Position>2</Position>
-      <StateNumber>748</StateNumber>
+      <StateNumber>762</StateNumber>
       <StoredType>varchar(50)|0s</StoredType>
       <TypeId>1043</TypeId>
     </column>
     <column id="270" parent="266" name="content">
       <NotNull>1</NotNull>
       <Position>3</Position>
-      <StateNumber>748</StateNumber>
+      <StateNumber>762</StateNumber>
       <StoredType>text|0s</StoredType>
       <TypeId>25</TypeId>
     </column>
     <column id="271" parent="266" name="timestamp">
       <NotNull>1</NotNull>
       <Position>4</Position>
-      <StateNumber>748</StateNumber>
+      <StateNumber>762</StateNumber>
       <StoredType>timestamp with time zone|0s</StoredType>
       <TypeId>1184</TypeId>
     </column>
     <foreign-key id="272" parent="266" name="chathistory_login_fkey">
       <ColNames>login</ColNames>
       <NameSurrogate>1</NameSurrogate>
-      <ObjectId>16411</ObjectId>
+      <ObjectId>16428</ObjectId>
       <OnDelete>cascade</OnDelete>
-      <StateNumber>748</StateNumber>
+      <StateNumber>762</StateNumber>
       <RefKeyColPositions>1</RefKeyColPositions>
-      <RefTableId>16399</RefTableId>
+      <RefTableId>16416</RefTableId>
     </foreign-key>
     <index id="273" parent="266" name="chathistory_pkey">
       <ColNames>login
 title
 timestamp</ColNames>
       <NameSurrogate>1</NameSurrogate>
-      <ObjectId>16409</ObjectId>
+      <ObjectId>16426</ObjectId>
       <Primary>1</Primary>
-      <StateNumber>748</StateNumber>
+      <StateNumber>762</StateNumber>
       <Unique>1</Unique>
       <AccessMethodId>403</AccessMethodId>
       <CollationIds>100
@@ -4320,31 +4312,31 @@ pg_catalog</CollationParentNames>
     </index>
     <key id="274" parent="266" name="chathistory_pkey">
       <NameSurrogate>1</NameSurrogate>
-      <ObjectId>16410</ObjectId>
+      <ObjectId>16427</ObjectId>
       <Primary>1</Primary>
-      <StateNumber>748</StateNumber>
-      <UnderlyingIndexId>16409</UnderlyingIndexId>
+      <StateNumber>762</StateNumber>
+      <UnderlyingIndexId>16426</UnderlyingIndexId>
     </key>
     <column id="275" parent="267" name="login">
       <NotNull>1</NotNull>
       <Position>1</Position>
-      <StateNumber>747</StateNumber>
+      <StateNumber>760</StateNumber>
       <StoredType>varchar(20)|0s</StoredType>
       <TypeId>1043</TypeId>
     </column>
     <column id="276" parent="267" name="password">
       <NotNull>1</NotNull>
       <Position>2</Position>
-      <StateNumber>747</StateNumber>
+      <StateNumber>760</StateNumber>
       <StoredType>varchar(20)|0s</StoredType>
       <TypeId>1043</TypeId>
     </column>
     <index id="277" parent="267" name="logininfo_pkey">
       <ColNames>login</ColNames>
       <NameSurrogate>1</NameSurrogate>
-      <ObjectId>16402</ObjectId>
+      <ObjectId>16419</ObjectId>
       <Primary>1</Primary>
-      <StateNumber>747</StateNumber>
+      <StateNumber>760</StateNumber>
       <Unique>1</Unique>
       <AccessMethodId>403</AccessMethodId>
       <CollationNames>default</CollationNames>
@@ -4353,10 +4345,10 @@ pg_catalog</CollationParentNames>
     </index>
     <key id="278" parent="267" name="logininfo_pkey">
       <NameSurrogate>1</NameSurrogate>
-      <ObjectId>16403</ObjectId>
+      <ObjectId>16420</ObjectId>
       <Primary>1</Primary>
-      <StateNumber>747</StateNumber>
-      <UnderlyingIndexId>16402</UnderlyingIndexId>
+      <StateNumber>760</StateNumber>
+      <UnderlyingIndexId>16419</UnderlyingIndexId>
     </key>
   </database-model>
 </dataSource>
