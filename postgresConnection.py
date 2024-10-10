@@ -17,8 +17,9 @@ conn_params = {
 
 # a function to get the chat history from the database
 @app.route('/history', methods=['Get'])
-def fetchHistory(username):
+def fetchHistory():
     try:
+        username = request.args.get('username')
         #connect to db
         conn = psycopg2.connect(**conn_params)
         cursor = conn.cursor()
@@ -52,18 +53,25 @@ def fetchHistory(username):
                     'timestamp': formatted_timestamp
                 })
 
-            return formatted_history
+            print("Chat history successfully fetched")
+            return jsonify({'history': formatted_history})
+
 
         print("Chat history successfully fetched")
-        return chat_history
+        return jsonify({'history': chat_history})
 
     except Exception as e:
         print(f"Error fetching chat history: {e}")
+        return jsonify({'error': str(e)})
 
 # a function to post AI response to the database
 @app.route('/history', methods=['Post'])
-def postHistory(user_login, title_message, ai_response):
+def postHistory():
     try:
+        data = request.json
+        user_login = data.get('login')
+        title_message = data.get('message')
+        ai_response = data.get('response')
         #connect to db
         conn = psycopg2.connect(**conn_params)
         cursor = conn.cursor()
@@ -84,10 +92,11 @@ def postHistory(user_login, title_message, ai_response):
         conn.close()
 
         print("AI response successfully posted to chatHistory")
+        return jsonify({'success': True})
 
     except Exception as e:
         print(f"Error posting to chat history: {e}")
-        return None
+        return jsonify({'success': False})
 
 #function to check if the given username and password are correct.
 @app.route('/users', methods=['Get'])
@@ -124,34 +133,36 @@ def checkLogin():
 #create login by posting user information
 @app.route('/users', methods=['Post'])
 def createUser():
-    newUser = request.json
-    print(newUser)
-    print(newUser['login'])
-    """
+    data = request.json
+    username = data.get('login')
+    print(username)
+    password = data.get('password')
+    print(password)
     try:
+
         #connect to db
         conn = psycopg2.connect(**conn_params)
         cursor = conn.cursor()
 
-        # SQL query to check if the user exists
-        query = "SELECT * FROM users WHERE username = %s;"
+        #define sql query
+        query = "SELECT * FROM loginInfo WHERE login = %s AND password = %s"
 
-        cursor.execute(query, (newUser['login'],))
+        #execute query
+        cursor.execute(query, (username, password))
 
-        # Fetch one result
-        user = cursor.fetchone()
+        #fetch result
+        result = cursor.fetchone()
 
-        # Close the cursor and connection
+        #close cursor and connection
         cursor.close()
         conn.close()
 
-        # Return True if user exists, False otherwise
-        if user is not None:
+        if result:
             raise Exception
+
     except Exception:
-        print(f"User Already Exists")
-        return newUser['login']
-        """
+        print("User already Exists")
+        return jsonify({'success': False})
 
     try:
         #connect to db
@@ -164,7 +175,7 @@ def createUser():
             VALUES (%s, %s)
         """
         #execute query
-        cursor.execute(query, (newUser['login'], newUser['password']))
+        cursor.execute(query, (username, password))
 
         #commit transaction 
         conn.commit()
@@ -174,10 +185,11 @@ def createUser():
         conn.close()
 
         print("New User Successfully Created")
-        return newUser['login']
+        return jsonify({'success': True})
 
     except Exception as e:
         print(f"Error creating new user, please try again: {e}")
-        return newUser['login']
+        return jsonify({'success': False})
+
 if __name__ == '__main__':
     app.run(debug=True)

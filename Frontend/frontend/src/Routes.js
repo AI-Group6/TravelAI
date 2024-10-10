@@ -5,19 +5,21 @@ const axiosInstance = axios.create({
 })
 
 export const postUser = async (username, password) => {
-    await axiosInstance.post('/users', {login: username, password: password});
+    const response = await axiosInstance.post('/users', {login: username, password: password});
+    return response.data.exists;
 }
 
 export const checkLogin = async (username, password) => {
     const response =  await axiosInstance.get('/users', {params: {login: username, password: password}});
-    return response.data.exists;
+    return response.data.success;
 }
 
 export const postHistory = async (user_login, title_message, ai_response) => {
-    await axios.post('http://localhost:5000/history', {user_login, title_message, ai_response});
+    const response = await axiosInstance.post('/history', {login: user_login, message: title_message, response: ai_response});
+    return response.data.success;
 }
 
-export const getHistory = async () => {
-    const response = await axios.get('http://localhost:5000/history');
-    return response;
+export const getHistory = async (username) => {
+    const response = await axiosInstance.get('/history', {params: {username: username}});
+    return response.data.history;
 }

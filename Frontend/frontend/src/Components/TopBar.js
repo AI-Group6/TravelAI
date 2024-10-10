@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Icon } from '@iconify/react';
-import {checkLogin, postUser} from "../Routes";
+import {createNewUser} from "../Routes";
 
 const TopBar = () => {
 
@@ -37,15 +37,7 @@ const TopBar = () => {
     }
 
     // Proceed with registration logic
-    checkLogin(username, password).then(exists => {
-      if (exists){
-        console.log("User Exists");
-      }
-      else{
-        console.log("User Does no Exist");
-      }
-    })
-    postUser(username, password);
+
     // Here you can call your API to register the user
   };
 
