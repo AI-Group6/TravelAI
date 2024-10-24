@@ -57,6 +57,138 @@ const Home = () => {
       }
     };
 
+    const handleItineraryMessage = async () => {
+      if (input.trim() !== '') {
+        // Add user input
+        const userMessage = {type: 'user', content: input}
+        setMessages([...messages, userMessage]);
+
+        //set Chat History
+        const newChatHistory = { title: input, date: new Date().toLocaleString() };
+        setChatHistory((prevHistory) => [...prevHistory, newChatHistory]);
+
+        setInput('');
+
+        // Call the Flask API
+        try {
+          const response = await fetch('http://127.0.0.1:5000/run_itinerary_planner', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ loggedUser, description: input }),
+          });
+
+          const data = await response.json();
+          if (response.ok) {
+            // Simulated AI response
+            setMessages((prevMessages) => [
+              ...prevMessages,
+              { type: 'ai', content: data.plan },
+            ]);
+          } else {
+            setMessages((prevMessages) => [
+              ...prevMessages,
+              { type: 'ai', content: data.error },
+            ]);
+          }
+        } catch (error) {
+          setMessages((prevMessages) => [
+            ...prevMessages,
+            { type: 'ai', content: 'Error communicating with the server.' },
+          ]);
+        }
+      }
+    };
+
+    const handleFlightMessage = async () => {
+      if (input.trim() !== '') {
+        // Add user input
+        const userMessage = {type: 'user', content: input}
+        setMessages([...messages, userMessage]);
+
+        //set Chat History
+        const newChatHistory = { title: input, date: new Date().toLocaleString() };
+        setChatHistory((prevHistory) => [...prevHistory, newChatHistory]);
+
+        setInput('');
+
+        // Call the Flask API
+        try {
+          const response = await fetch('http://127.0.0.1:5000/run_flight_planner', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ loggedUser, description: input }),
+          });
+
+          const data = await response.json();
+          if (response.ok) {
+            // Simulated AI response
+            setMessages((prevMessages) => [
+              ...prevMessages,
+              { type: 'ai', content: data.plan },
+            ]);
+          } else {
+            setMessages((prevMessages) => [
+              ...prevMessages,
+              { type: 'ai', content: data.error },
+            ]);
+          }
+        } catch (error) {
+          setMessages((prevMessages) => [
+            ...prevMessages,
+            { type: 'ai', content: 'Error communicating with the server.' },
+          ]);
+        }
+      }
+    };
+
+    const handleLodgingMessage = async () => {
+      if (input.trim() !== '') {
+        // Add user input
+        const userMessage = {type: 'user', content: input}
+        setMessages([...messages, userMessage]);
+
+        //set Chat History
+        const newChatHistory = { title: input, date: new Date().toLocaleString() };
+        setChatHistory((prevHistory) => [...prevHistory, newChatHistory]);
+
+        setInput('');
+
+        // Call the Flask API
+        try {
+          const response = await fetch('http://127.0.0.1:5000/run_lodging_planner', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ loggedUser, description: input }),
+          });
+
+          const data = await response.json();
+          if (response.ok) {
+            // Simulated AI response
+            setMessages((prevMessages) => [
+              ...prevMessages,
+              { type: 'ai', content: data.plan },
+            ]);
+          } else {
+            setMessages((prevMessages) => [
+              ...prevMessages,
+              { type: 'ai', content: data.error },
+            ]);
+          }
+        } catch (error) {
+          setMessages((prevMessages) => [
+            ...prevMessages,
+            { type: 'ai', content: 'Error communicating with the server.' },
+          ]);
+        }
+      }
+    };
+
     const handleChatClick = (chat) => {
       {/* Doesnt clear yet */}
       setMessages([]);
@@ -77,22 +209,22 @@ const Home = () => {
         <div className="h-screen flex flex-col">
           {/* Top Bar */}
           <TopBar />
-    
+
           <div className="flex flex-1 overflow-hidden">
             {/* Sidebar Section */}
             <div className="w-1/4 bg-[#563635] text-white p-5">
               <Sidebar chatHistory={chatHistory} onChatClick={handleChatClick} />
             </div>
-    
+
             {/* Main Content Section */}
             <div className="w-3/4 flex flex-col bg-[#fad4c0] h-full">
               {/* Action Buttons Section */}
               {/* Check if messages have been sent */}
               {messages.length === 0 && (
                 <div className="grid grid-cols-3 ml-32 mb-1 mt-24 font-josefin">
-                  <ActionButton label= {"Find \nFlights"} icon={flightIcon} />
-                  <ActionButton label= {"Find \nLodging"} icon={lodgingIcon} />
-                  <ActionButton label= {"Itinerary \nPlanning"} icon={itineraryIcon} />
+                  <ActionButton label= {"Find \nFlights"} icon={flightIcon} onClick={handleFlightMessage}/>
+                  <ActionButton label= {"Find \nLodging"} icon={lodgingIcon} onClick={handleLodgingMessage}/>
+                  <ActionButton label= {"Itinerary \nPlanning"} icon={itineraryIcon} onClick={handleItineraryMessage}/>
                 </div>
               )}
 
@@ -113,7 +245,7 @@ const Home = () => {
                   </div>
                 ))}
               </div>
-    
+
               {/* Input Section */}
               <div className="w-full flex items-center bg-[#fadbca] shadow-2xl shadow-black p-2">
                 <input
